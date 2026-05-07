@@ -1,0 +1,841 @@
+<html>
+<head>
+<title>app.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#191a1c">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+app.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">streamlit </span><span class="s0">as </span><span class="s1">st</span>
+<span class="s0">import </span><span class="s1">pandas </span><span class="s0">as </span><span class="s1">pd</span>
+<span class="s0">import </span><span class="s1">plotly</span><span class="s2">.</span><span class="s1">express </span><span class="s0">as </span><span class="s1">px</span>
+<span class="s0">import </span><span class="s1">plotly</span><span class="s2">.</span><span class="s1">graph_objects </span><span class="s0">as </span><span class="s1">go</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># PAGE CONFIG</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">set_page_config</span><span class="s2">(</span>
+    <span class="s1">page_title</span><span class="s2">=</span><span class="s4">&quot;College Golf Analytics&quot;</span><span class="s2">,</span>
+    <span class="s1">page_icon</span><span class="s2">=</span><span class="s4">&quot;⛳&quot;</span><span class="s2">,</span>
+    <span class="s1">layout</span><span class="s2">=</span><span class="s4">&quot;wide&quot;</span><span class="s2">,</span>
+    <span class="s1">initial_sidebar_state</span><span class="s2">=</span><span class="s4">&quot;expanded&quot;</span>
+<span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># CUSTOM CSS — PROFESSIONAL DARK THEME</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;&quot;&quot; 
+&lt;style&gt; 
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&amp;family=DM+Serif+Display:ital@0;1&amp;display=swap'); 
+ 
+  :root { 
+    --green-primary:  #2ECC87; 
+    --green-dark:     #1A7A50; 
+    --green-glow:     rgba(46,204,135,0.15); 
+    --bg-base:        #0B0F0D; 
+    --bg-card:        #111915; 
+    --bg-sidebar:     #0D1410; 
+    --border:         rgba(46,204,135,0.12); 
+    --border-strong:  rgba(46,204,135,0.28); 
+    --text-primary:   #E8F2EC; 
+    --text-secondary: #8BA898; 
+    --accent-gold:    #F0C040; 
+    --accent-red:     #E05555; 
+    --radius:         10px; 
+  } 
+ 
+  html, body, [class*=&quot;css&quot;] { 
+    font-family: 'DM Sans', sans-serif; 
+    background-color: var(--bg-base) !important; 
+    color: var(--text-primary); 
+  } 
+ 
+  #MainMenu, footer, header { visibility: hidden; } 
+  .block-container { padding: 1.5rem 2rem 3rem; max-width: 1400px; } 
+ 
+  [data-testid=&quot;stSidebar&quot;] { 
+    background-color: var(--bg-sidebar) !important; 
+    border-right: 1px solid var(--border); 
+  } 
+  [data-testid=&quot;stSidebar&quot;] label { 
+    color: var(--text-secondary) !important; 
+    font-size: 0.72rem !important; 
+    font-weight: 600 !important; 
+    text-transform: uppercase; 
+    letter-spacing: 0.08em; 
+  } 
+  [data-testid=&quot;stMultiSelect&quot;] span[data-baseweb=&quot;tag&quot;] { 
+    background-color: var(--green-dark) !important; 
+    color: var(--text-primary) !important; 
+    border-radius: 4px !important; 
+  } 
+ 
+  .stTabs [data-baseweb=&quot;tab-list&quot;] { 
+    gap: 2px; 
+    background: var(--bg-card); 
+    padding: 4px; 
+    border-radius: var(--radius); 
+    border: 1px solid var(--border); 
+  } 
+  .stTabs [data-baseweb=&quot;tab&quot;] { 
+    background: transparent; 
+    color: var(--text-secondary); 
+    border-radius: 7px; 
+    padding: 0.5rem 1.1rem; 
+    font-size: 0.85rem; 
+    font-weight: 500; 
+    border: none; 
+  } 
+  .stTabs [aria-selected=&quot;true&quot;] { 
+    background: var(--green-dark) !important; 
+    color: var(--text-primary) !important; 
+  } 
+ 
+  [data-testid=&quot;metric-container&quot;] { 
+    background: var(--bg-card); 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius); 
+    padding: 1rem 1.25rem; 
+  } 
+  [data-testid=&quot;metric-container&quot;]:hover { border-color: var(--border-strong); } 
+  [data-testid=&quot;stMetricValue&quot;] { 
+    color: var(--green-primary) !important; 
+    font-family: 'DM Serif Display', serif !important; 
+    font-size: 2rem !important; 
+  } 
+  [data-testid=&quot;stMetricLabel&quot;] { 
+    color: var(--text-secondary) !important; 
+    font-size: 0.75rem !important; 
+    text-transform: uppercase; 
+    letter-spacing: 0.06em; 
+  } 
+ 
+  [data-testid=&quot;stDataFrame&quot;] { 
+    border: 1px solid var(--border) !important; 
+    border-radius: var(--radius) !important; 
+  } 
+ 
+  [data-testid=&quot;stSelectbox&quot;] &gt; div &gt; div, 
+  [data-testid=&quot;stMultiSelect&quot;] &gt; div &gt; div { 
+    background-color: var(--bg-card) !important; 
+    border: 1px solid var(--border) !important; 
+    border-radius: 7px !important; 
+    color: var(--text-primary) !important; 
+  } 
+ 
+  hr { border-color: var(--border) !important; } 
+ 
+  .section-header { 
+    font-family: 'DM Serif Display', serif; 
+    font-size: 1.3rem; 
+    color: var(--text-primary); 
+    margin-bottom: 0.25rem; 
+  } 
+  .section-sub { 
+    font-size: 0.82rem; 
+    color: var(--text-secondary); 
+    margin-bottom: 1.2rem; 
+  } 
+  .insight-box { 
+    background: var(--green-glow); 
+    border-left: 3px solid var(--green-primary); 
+    border-radius: 0 var(--radius) var(--radius) 0; 
+    padding: 0.75rem 1rem; 
+    margin: 0.75rem 0 1.25rem; 
+    font-size: 0.85rem; 
+    color: var(--text-primary); 
+  } 
+  .warn-box { 
+    background: rgba(240,192,64,0.08); 
+    border-left: 3px solid var(--accent-gold); 
+    border-radius: 0 var(--radius) var(--radius) 0; 
+    padding: 0.75rem 1rem; 
+    font-size: 0.85rem; 
+    color: var(--text-primary); 
+  } 
+  .page-title { 
+    font-family: 'DM Serif Display', serif; 
+    font-size: 2.4rem; 
+    color: var(--text-primary); 
+    line-height: 1.15; 
+    margin-bottom: 0.1rem; 
+  } 
+  .page-subtitle { 
+    font-size: 0.9rem; 
+    color: var(--text-secondary); 
+    margin-bottom: 1.75rem; 
+  } 
+&lt;/style&gt; 
+&quot;&quot;&quot;</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># PLOTLY SHARED THEME</span>
+<span class="s3"># =========================</span>
+<span class="s1">PLOTLY_LAYOUT </span><span class="s2">= </span><span class="s1">dict</span><span class="s2">(</span>
+    <span class="s1">paper_bgcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(0,0,0,0)&quot;</span><span class="s2">,</span>
+    <span class="s1">plot_bgcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(0,0,0,0)&quot;</span><span class="s2">,</span>
+    <span class="s1">font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">family</span><span class="s2">=</span><span class="s4">&quot;DM Sans&quot;</span><span class="s2">, </span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">, </span><span class="s1">size</span><span class="s2">=</span><span class="s5">12</span><span class="s2">),</span>
+    <span class="s1">title_font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">family</span><span class="s2">=</span><span class="s4">&quot;DM Serif Display&quot;</span><span class="s2">, </span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#E8F2EC&quot;</span><span class="s2">, </span><span class="s1">size</span><span class="s2">=</span><span class="s5">16</span><span class="s2">),</span>
+    <span class="s1">legend</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span>
+        <span class="s1">bgcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(17,25,21,0.85)&quot;</span><span class="s2">,</span>
+        <span class="s1">bordercolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.18)&quot;</span><span class="s2">,</span>
+        <span class="s1">borderwidth</span><span class="s2">=</span><span class="s5">1</span><span class="s2">,</span>
+        <span class="s1">font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">, </span><span class="s1">size</span><span class="s2">=</span><span class="s5">11</span><span class="s2">),</span>
+    <span class="s2">),</span>
+    <span class="s1">xaxis</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span>
+        <span class="s1">gridcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.07)&quot;</span><span class="s2">,</span>
+        <span class="s1">zerolinecolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.12)&quot;</span><span class="s2">,</span>
+        <span class="s1">tickfont</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">),</span>
+        <span class="s1">title_font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">),</span>
+    <span class="s2">),</span>
+    <span class="s1">yaxis</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span>
+        <span class="s1">gridcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.07)&quot;</span><span class="s2">,</span>
+        <span class="s1">zerolinecolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.12)&quot;</span><span class="s2">,</span>
+        <span class="s1">tickfont</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">),</span>
+        <span class="s1">title_font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">),</span>
+    <span class="s2">),</span>
+    <span class="s1">margin</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">l</span><span class="s2">=</span><span class="s5">40</span><span class="s2">, </span><span class="s1">r</span><span class="s2">=</span><span class="s5">20</span><span class="s2">, </span><span class="s1">t</span><span class="s2">=</span><span class="s5">50</span><span class="s2">, </span><span class="s1">b</span><span class="s2">=</span><span class="s5">40</span><span class="s2">),</span>
+    <span class="s1">hoverlabel</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span>
+        <span class="s1">bgcolor</span><span class="s2">=</span><span class="s4">&quot;#111915&quot;</span><span class="s2">,</span>
+        <span class="s1">bordercolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.3)&quot;</span><span class="s2">,</span>
+        <span class="s1">font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#E8F2EC&quot;</span><span class="s2">, </span><span class="s1">size</span><span class="s2">=</span><span class="s5">12</span><span class="s2">),</span>
+    <span class="s2">),</span>
+<span class="s2">)</span>
+
+<span class="s1">TEAM_PALETTE </span><span class="s2">= [</span>
+    <span class="s4">&quot;#2ECC87&quot;</span><span class="s2">, </span><span class="s4">&quot;#F0C040&quot;</span><span class="s2">, </span><span class="s4">&quot;#5BA3F5&quot;</span><span class="s2">, </span><span class="s4">&quot;#F07050&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;#A078E8&quot;</span><span class="s2">, </span><span class="s4">&quot;#50C8B4&quot;</span><span class="s2">, </span><span class="s4">&quot;#E87890&quot;</span><span class="s2">, </span><span class="s4">&quot;#88C850&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;#F09030&quot;</span><span class="s2">, </span><span class="s4">&quot;#7098D8&quot;</span><span class="s2">, </span><span class="s4">&quot;#D068A0&quot;</span><span class="s2">, </span><span class="s4">&quot;#60B8E0&quot;</span><span class="s2">,</span>
+<span class="s2">]</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># LOAD DATA</span>
+<span class="s3"># =========================</span>
+<span class="s2">@</span><span class="s1">st</span><span class="s2">.</span><span class="s1">cache_data</span>
+<span class="s0">def </span><span class="s1">load_data</span><span class="s2">():</span>
+    <span class="s0">return </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">read_csv</span><span class="s2">(</span><span class="s4">&quot;golf_data_validated.csv&quot;</span><span class="s2">)</span>
+
+<span class="s1">df </span><span class="s2">= </span><span class="s1">load_data</span><span class="s2">()</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># CLEAN DATA</span>
+<span class="s3"># =========================</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">] = </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">to_numeric</span><span class="s2">(</span>
+    <span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Position&quot;</span><span class="s2">].</span><span class="s1">astype</span><span class="s2">(</span><span class="s1">str</span><span class="s2">).</span><span class="s1">str</span><span class="s2">.</span><span class="s1">extract</span><span class="s2">(</span><span class="s4">r'(\d+)'</span><span class="s2">)[</span><span class="s5">0</span><span class="s2">], </span><span class="s1">errors</span><span class="s2">=</span><span class="s4">&quot;coerce&quot;</span>
+<span class="s2">)</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">]           = </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">to_numeric</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">],        </span><span class="s1">errors</span><span class="s2">=</span><span class="s4">&quot;coerce&quot;</span><span class="s2">)</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">]    = </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">to_numeric</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">], </span><span class="s1">errors</span><span class="s2">=</span><span class="s4">&quot;coerce&quot;</span><span class="s2">)</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">] = </span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">] - </span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">]</span>
+<span class="s1">df </span><span class="s2">= </span><span class="s1">df</span><span class="s2">.</span><span class="s1">dropna</span><span class="s2">(</span><span class="s1">subset</span><span class="s2">=[</span><span class="s4">&quot;score&quot;</span><span class="s2">, </span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">, </span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">])</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># PAGE HEADER</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;page-title&quot;&gt;⛳ College Golf Analytics&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+    <span class="s4">'&lt;div class=&quot;page-subtitle&quot;&gt;NCAA tournament performance dashboard — track, compare, and analyze team results&lt;/div&gt;'</span><span class="s2">,</span>
+    <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+<span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># SIDEBAR FILTERS</span>
+<span class="s3"># =========================</span>
+<span class="s0">with </span><span class="s1">st</span><span class="s2">.</span><span class="s1">sidebar</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;### 🎛️ Filters&quot;</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+
+    <span class="s1">all_teams  </span><span class="s2">= </span><span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">())</span>
+    <span class="s1">all_events </span><span class="s2">= </span><span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">())</span>
+
+    <span class="s1">teams </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">multiselect</span><span class="s2">(</span><span class="s4">&quot;Teams&quot;</span><span class="s2">, </span><span class="s1">all_teams</span><span class="s2">, </span><span class="s1">default</span><span class="s2">=</span><span class="s1">all_teams</span><span class="s2">, </span><span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;teams_filter&quot;</span><span class="s2">)</span>
+    <span class="s1">events </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">multiselect</span><span class="s2">(</span><span class="s4">&quot;Tournaments&quot;</span><span class="s2">, </span><span class="s1">all_events</span><span class="s2">, </span><span class="s1">default</span><span class="s2">=</span><span class="s1">all_events</span><span class="s2">, </span><span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;events_filter&quot;</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;### 📊 Score Range&quot;</span><span class="s2">)</span>
+    <span class="s1">score_min </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">].</span><span class="s1">min</span><span class="s2">())</span>
+    <span class="s1">score_max </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">].</span><span class="s1">max</span><span class="s2">())</span>
+    <span class="s1">score_range </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">slider</span><span class="s2">(</span>
+        <span class="s4">&quot;Filter by total score&quot;</span><span class="s2">,</span>
+        <span class="s1">min_value</span><span class="s2">=</span><span class="s1">score_min</span><span class="s2">,</span>
+        <span class="s1">max_value</span><span class="s2">=</span><span class="s1">score_max</span><span class="s2">,</span>
+        <span class="s1">value</span><span class="s2">=(</span><span class="s1">score_min</span><span class="s2">, </span><span class="s1">score_max</span><span class="s2">),</span>
+        <span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;score_range&quot;</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;### ⚔️ Head-to-Head&quot;</span><span class="s2">)</span>
+    <span class="s1">compare_teams </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">multiselect</span><span class="s2">(</span>
+        <span class="s4">&quot;Select exactly 2 teams&quot;</span><span class="s2">,</span>
+        <span class="s1">all_teams</span><span class="s2">,</span>
+        <span class="s1">max_selections</span><span class="s2">=</span><span class="s5">2</span><span class="s2">,</span>
+        <span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;compare_teams&quot;</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;### 🔢 Display Options&quot;</span><span class="s2">)</span>
+    <span class="s1">top_n </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">selectbox</span><span class="s2">(</span><span class="s4">&quot;Top N teams in charts&quot;</span><span class="s2">, [</span><span class="s5">5</span><span class="s2">, </span><span class="s5">10</span><span class="s2">, </span><span class="s5">15</span><span class="s2">, </span><span class="s5">20</span><span class="s2">, </span><span class="s4">&quot;All&quot;</span><span class="s2">], </span><span class="s1">index</span><span class="s2">=</span><span class="s5">1</span><span class="s2">, </span><span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;top_n&quot;</span><span class="s2">)</span>
+    <span class="s1">show_avg_line </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">checkbox</span><span class="s2">(</span><span class="s4">&quot;Show field average line&quot;</span><span class="s2">, </span><span class="s1">value</span><span class="s2">=</span><span class="s0">True</span><span class="s2">, </span><span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;avg_line&quot;</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># APPLY FILTERS</span>
+<span class="s3"># =========================</span>
+<span class="s1">filtered_df </span><span class="s2">= </span><span class="s1">df</span><span class="s2">[</span>
+    <span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">teams</span><span class="s2">) &amp;</span>
+    <span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">events</span><span class="s2">) &amp;</span>
+    <span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">].</span><span class="s1">between</span><span class="s2">(</span><span class="s1">score_range</span><span class="s2">[</span><span class="s5">0</span><span class="s2">], </span><span class="s1">score_range</span><span class="s2">[</span><span class="s5">1</span><span class="s2">])</span>
+<span class="s2">]</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># KPI METRIC CARDS</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+<span class="s1">k1</span><span class="s2">, </span><span class="s1">k2</span><span class="s2">, </span><span class="s1">k3</span><span class="s2">, </span><span class="s1">k4</span><span class="s2">, </span><span class="s1">k5 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">(</span><span class="s5">5</span><span class="s2">)</span>
+
+<span class="s0">if not </span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">empty</span><span class="s2">:</span>
+    <span class="s1">best_pos   </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">].</span><span class="s1">min</span><span class="s2">())</span>
+    <span class="s1">avg_gap    </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">()</span>
+    <span class="s1">num_events </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">nunique</span><span class="s2">()</span>
+    <span class="s1">num_teams  </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">nunique</span><span class="s2">()</span>
+    <span class="s1">best_team  </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">)[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">().</span><span class="s1">idxmin</span><span class="s2">()</span>
+<span class="s0">else</span><span class="s2">:</span>
+    <span class="s1">best_pos   </span><span class="s2">= </span><span class="s4">&quot;—&quot;</span>
+    <span class="s1">avg_gap    </span><span class="s2">= </span><span class="s0">None</span>
+    <span class="s1">num_events </span><span class="s2">= </span><span class="s5">0</span>
+    <span class="s1">num_teams  </span><span class="s2">= </span><span class="s5">0</span>
+    <span class="s1">best_team  </span><span class="s2">= </span><span class="s4">&quot;—&quot;</span>
+
+<span class="s1">k1</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">&quot;Best Finish&quot;</span><span class="s2">,        </span><span class="s4">f&quot;T</span><span class="s0">{</span><span class="s1">best_pos</span><span class="s0">}</span><span class="s4">&quot; </span><span class="s0">if </span><span class="s1">best_pos </span><span class="s2">!= </span><span class="s4">&quot;—&quot; </span><span class="s0">else </span><span class="s4">&quot;—&quot;</span><span class="s2">)</span>
+<span class="s1">k2</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">&quot;Avg Strokes Behind&quot;</span><span class="s2">, </span><span class="s4">f&quot;+</span><span class="s0">{</span><span class="s1">avg_gap</span><span class="s0">:</span><span class="s4">.1f</span><span class="s0">}</span><span class="s4">&quot; </span><span class="s0">if </span><span class="s1">avg_gap </span><span class="s0">is not None else </span><span class="s4">&quot;—&quot;</span><span class="s2">)</span>
+<span class="s1">k3</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">&quot;Tournaments&quot;</span><span class="s2">,        </span><span class="s1">num_events</span><span class="s2">)</span>
+<span class="s1">k4</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">&quot;Teams&quot;</span><span class="s2">,              </span><span class="s1">num_teams</span><span class="s2">)</span>
+<span class="s1">k5</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">&quot;Top Performer&quot;</span><span class="s2">,      </span><span class="s1">best_team</span><span class="s2">)</span>
+
+<span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># HELPER: top-N filter</span>
+<span class="s3"># =========================</span>
+<span class="s0">def </span><span class="s1">apply_top_n</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">col</span><span class="s2">=</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">):</span>
+    <span class="s0">if </span><span class="s1">top_n </span><span class="s2">== </span><span class="s4">&quot;All&quot;</span><span class="s2">:</span>
+        <span class="s0">return </span><span class="s1">frame</span>
+    <span class="s1">top </span><span class="s2">= (</span>
+        <span class="s1">frame</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">)[</span><span class="s1">col</span><span class="s2">]</span>
+        <span class="s2">.</span><span class="s1">mean</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">nsmallest</span><span class="s2">(</span><span class="s1">int</span><span class="s2">(</span><span class="s1">top_n</span><span class="s2">))</span>
+        <span class="s2">.</span><span class="s1">index</span><span class="s2">.</span><span class="s1">tolist</span><span class="s2">()</span>
+    <span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">frame</span><span class="s2">[</span><span class="s1">frame</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">top</span><span class="s2">)]</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># TABS</span>
+<span class="s3"># =========================</span>
+<span class="s1">tab1</span><span class="s2">, </span><span class="s1">tab2</span><span class="s2">, </span><span class="s1">tab3</span><span class="s2">, </span><span class="s1">tab4</span><span class="s2">, </span><span class="s1">tab5</span><span class="s2">, </span><span class="s1">tab6 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">tabs</span><span class="s2">([</span>
+    <span class="s4">&quot;🗺️  Map&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;📈  Trends&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;🏆  Tournament&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;📊  vs Winner&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;🏫  Leaderboard&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;⚔️  Head-to-Head&quot;</span><span class="s2">,</span>
+<span class="s2">])</span>
+
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s3"># TAB 1 — MAP</span>
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s0">with </span><span class="s1">tab1</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Tournament Locations&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Each pin represents a tournament venue. '</span>
+        <span class="s4">'Color = average strokes behind winner (green = close, red = far). '</span>
+        <span class="s4">'Pin size = number of teams entered.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s0">if </span><span class="s2">{</span><span class="s4">&quot;Latitude&quot;</span><span class="s2">, </span><span class="s4">&quot;Longitude&quot;</span><span class="s2">}.</span><span class="s1">issubset</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">):</span>
+        <span class="s1">map_df </span><span class="s2">= (</span>
+            <span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Event name&quot;</span><span class="s2">)</span>
+            <span class="s2">.</span><span class="s1">agg</span><span class="s2">(</span>
+                <span class="s1">Latitude</span><span class="s2">=(</span><span class="s4">&quot;Latitude&quot;</span><span class="s2">, </span><span class="s4">&quot;first&quot;</span><span class="s2">),</span>
+                <span class="s1">Longitude</span><span class="s2">=(</span><span class="s4">&quot;Longitude&quot;</span><span class="s2">, </span><span class="s4">&quot;first&quot;</span><span class="s2">),</span>
+                <span class="s1">Avg_Gap</span><span class="s2">=(</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">),</span>
+                <span class="s1">Teams_Entered</span><span class="s2">=(</span><span class="s4">&quot;Team&quot;</span><span class="s2">, </span><span class="s4">&quot;nunique&quot;</span><span class="s2">),</span>
+                <span class="s1">Avg_Score</span><span class="s2">=(</span><span class="s4">&quot;score&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">),</span>
+            <span class="s2">)</span>
+            <span class="s2">.</span><span class="s1">reset_index</span><span class="s2">()</span>
+        <span class="s2">)</span>
+        <span class="s1">map_df</span><span class="s2">[</span><span class="s4">&quot;Avg_Gap_rounded&quot;</span><span class="s2">] = </span><span class="s1">map_df</span><span class="s2">[</span><span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">].</span><span class="s1">round</span><span class="s2">(</span><span class="s5">1</span><span class="s2">)</span>
+        <span class="s1">map_df</span><span class="s2">[</span><span class="s4">&quot;Avg_Score&quot;</span><span class="s2">]       = </span><span class="s1">map_df</span><span class="s2">[</span><span class="s4">&quot;Avg_Score&quot;</span><span class="s2">].</span><span class="s1">round</span><span class="s2">(</span><span class="s5">1</span><span class="s2">)</span>
+
+        <span class="s1">fig_map </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">scatter_mapbox</span><span class="s2">(</span>
+            <span class="s1">map_df</span><span class="s2">,</span>
+            <span class="s1">lat</span><span class="s2">=</span><span class="s4">&quot;Latitude&quot;</span><span class="s2">,</span>
+            <span class="s1">lon</span><span class="s2">=</span><span class="s4">&quot;Longitude&quot;</span><span class="s2">,</span>
+            <span class="s1">hover_name</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+            <span class="s1">hover_data</span><span class="s2">={</span>
+                <span class="s4">&quot;Avg_Gap_rounded&quot;</span><span class="s2">: </span><span class="s0">True</span><span class="s2">,</span>
+                <span class="s4">&quot;Teams_Entered&quot;</span><span class="s2">:   </span><span class="s0">True</span><span class="s2">,</span>
+                <span class="s4">&quot;Avg_Score&quot;</span><span class="s2">:       </span><span class="s0">True</span><span class="s2">,</span>
+                <span class="s4">&quot;Latitude&quot;</span><span class="s2">:        </span><span class="s0">False</span><span class="s2">,</span>
+                <span class="s4">&quot;Longitude&quot;</span><span class="s2">:       </span><span class="s0">False</span><span class="s2">,</span>
+                <span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">:         </span><span class="s0">False</span><span class="s2">,</span>
+            <span class="s2">},</span>
+            <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">,</span>
+            <span class="s1">color_continuous_scale</span><span class="s2">=[</span>
+                <span class="s2">[</span><span class="s5">0.0</span><span class="s2">, </span><span class="s4">&quot;#2ECC87&quot;</span><span class="s2">],</span>
+                <span class="s2">[</span><span class="s5">0.5</span><span class="s2">, </span><span class="s4">&quot;#F0C040&quot;</span><span class="s2">],</span>
+                <span class="s2">[</span><span class="s5">1.0</span><span class="s2">, </span><span class="s4">&quot;#E05555&quot;</span><span class="s2">],</span>
+            <span class="s2">],</span>
+            <span class="s1">size</span><span class="s2">=</span><span class="s4">&quot;Teams_Entered&quot;</span><span class="s2">,</span>
+            <span class="s1">size_max</span><span class="s2">=</span><span class="s5">22</span><span class="s2">,</span>
+            <span class="s1">zoom</span><span class="s2">=</span><span class="s5">3.5</span><span class="s2">,</span>
+            <span class="s1">height</span><span class="s2">=</span><span class="s5">520</span><span class="s2">,</span>
+            <span class="s1">labels</span><span class="s2">={</span>
+                <span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">:         </span><span class="s4">&quot;Avg strokes behind&quot;</span><span class="s2">,</span>
+                <span class="s4">&quot;Avg_Gap_rounded&quot;</span><span class="s2">: </span><span class="s4">&quot;Avg strokes behind&quot;</span><span class="s2">,</span>
+                <span class="s4">&quot;Teams_Entered&quot;</span><span class="s2">:   </span><span class="s4">&quot;Teams entered&quot;</span><span class="s2">,</span>
+                <span class="s4">&quot;Avg_Score&quot;</span><span class="s2">:       </span><span class="s4">&quot;Avg score&quot;</span><span class="s2">,</span>
+            <span class="s2">},</span>
+        <span class="s2">)</span>
+        <span class="s3"># FIX: use title=dict(...) instead of deprecated titlefont=</span>
+        <span class="s1">fig_map</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(</span>
+            <span class="s1">mapbox_style</span><span class="s2">=</span><span class="s4">&quot;carto-darkmatter&quot;</span><span class="s2">,</span>
+            <span class="s1">paper_bgcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(0,0,0,0)&quot;</span><span class="s2">,</span>
+            <span class="s1">coloraxis_colorbar</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span>
+                <span class="s1">title</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span>
+                    <span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;Strokes&lt;br&gt;behind&quot;</span><span class="s2">,</span>
+                    <span class="s1">font</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">),</span>
+                <span class="s2">),</span>
+                <span class="s1">tickfont</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;#8BA898&quot;</span><span class="s2">),</span>
+                <span class="s1">bgcolor</span><span class="s2">=</span><span class="s4">&quot;rgba(17,25,21,0.85)&quot;</span><span class="s2">,</span>
+                <span class="s1">bordercolor</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.18)&quot;</span><span class="s2">,</span>
+                <span class="s1">borderwidth</span><span class="s2">=</span><span class="s5">1</span><span class="s2">,</span>
+            <span class="s2">),</span>
+            <span class="s1">margin</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">l</span><span class="s2">=</span><span class="s5">0</span><span class="s2">, </span><span class="s1">r</span><span class="s2">=</span><span class="s5">0</span><span class="s2">, </span><span class="s1">t</span><span class="s2">=</span><span class="s5">0</span><span class="s2">, </span><span class="s1">b</span><span class="s2">=</span><span class="s5">0</span><span class="s2">),</span>
+        <span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_map</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+            <span class="s4">'&lt;div class=&quot;insight-box&quot;&gt;💡 &lt;strong&gt;How to read this map:&lt;/strong&gt; Pin size = teams entered. '</span>
+            <span class="s4">'Green = field close to winner. Red = field far behind — suggesting a dominant winner '</span>
+            <span class="s4">'or weaker competition.&lt;/div&gt;'</span><span class="s2">,</span>
+            <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+        <span class="s2">)</span>
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+            <span class="s4">'&lt;div class=&quot;warn-box&quot;&gt;⚠️ Latitude/Longitude columns not found. '</span>
+            <span class="s4">'Add them to your CSV to enable the map.&lt;/div&gt;'</span><span class="s2">,</span>
+            <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+        <span class="s2">)</span>
+
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s3"># TAB 2 — TRENDS</span>
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s0">with </span><span class="s1">tab2</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Performance Trends&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Scoring average and gap-to-winner across tournaments. '</span>
+        <span class="s4">'Use the Top N sidebar filter to reduce chart clutter.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">trend_raw </span><span class="s2">= (</span>
+        <span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">([</span><span class="s4">&quot;Event name&quot;</span><span class="s2">, </span><span class="s4">&quot;Team&quot;</span><span class="s2">])</span>
+        <span class="s2">.</span><span class="s1">agg</span><span class="s2">(</span><span class="s1">Avg_Score</span><span class="s2">=(</span><span class="s4">&quot;score&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">), </span><span class="s1">Avg_Gap</span><span class="s2">=(</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">))</span>
+        <span class="s2">.</span><span class="s1">reset_index</span><span class="s2">()</span>
+    <span class="s2">)</span>
+    <span class="s1">trend_df </span><span class="s2">= </span><span class="s1">apply_top_n</span><span class="s2">(</span><span class="s1">trend_raw</span><span class="s2">, </span><span class="s1">col</span><span class="s2">=</span><span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">)</span>
+
+    <span class="s1">col_t1</span><span class="s2">, </span><span class="s1">col_t2 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">(</span><span class="s5">2</span><span class="s2">)</span>
+
+    <span class="s0">with </span><span class="s1">col_t1</span><span class="s2">:</span>
+        <span class="s1">fig_trend </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">line</span><span class="s2">(</span>
+            <span class="s1">trend_df</span><span class="s2">,</span>
+            <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+            <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Avg_Score&quot;</span><span class="s2">,</span>
+            <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+            <span class="s1">markers</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+            <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Scoring average across tournaments&quot;</span><span class="s2">,</span>
+            <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+            <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;Avg_Score&quot;</span><span class="s2">: </span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">, </span><span class="s4">&quot;Event name&quot;</span><span class="s2">: </span><span class="s4">&quot;Tournament&quot;</span><span class="s2">},</span>
+        <span class="s2">)</span>
+        <span class="s0">if </span><span class="s1">show_avg_line</span><span class="s2">:</span>
+            <span class="s1">field_avg </span><span class="s2">= </span><span class="s1">trend_raw</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Event name&quot;</span><span class="s2">)[</span><span class="s4">&quot;Avg_Score&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">().</span><span class="s1">reset_index</span><span class="s2">()</span>
+            <span class="s1">fig_trend</span><span class="s2">.</span><span class="s1">add_scatter</span><span class="s2">(</span>
+                <span class="s1">x</span><span class="s2">=</span><span class="s1">field_avg</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">],</span>
+                <span class="s1">y</span><span class="s2">=</span><span class="s1">field_avg</span><span class="s2">[</span><span class="s4">&quot;Avg_Score&quot;</span><span class="s2">],</span>
+                <span class="s1">mode</span><span class="s2">=</span><span class="s4">&quot;lines&quot;</span><span class="s2">,</span>
+                <span class="s1">line</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;rgba(240,192,64,0.5)&quot;</span><span class="s2">, </span><span class="s1">dash</span><span class="s2">=</span><span class="s4">&quot;dot&quot;</span><span class="s2">, </span><span class="s1">width</span><span class="s2">=</span><span class="s5">1.5</span><span class="s2">),</span>
+                <span class="s1">name</span><span class="s2">=</span><span class="s4">&quot;Field avg&quot;</span><span class="s2">,</span>
+            <span class="s2">)</span>
+        <span class="s1">fig_trend</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+        <span class="s1">fig_trend</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_trend</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s0">with </span><span class="s1">col_t2</span><span class="s2">:</span>
+        <span class="s1">fig_gap_trend </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">line</span><span class="s2">(</span>
+            <span class="s1">trend_df</span><span class="s2">,</span>
+            <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+            <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">,</span>
+            <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+            <span class="s1">markers</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+            <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Strokes behind winner — trend&quot;</span><span class="s2">,</span>
+            <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+            <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;Avg_Gap&quot;</span><span class="s2">: </span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">, </span><span class="s4">&quot;Event name&quot;</span><span class="s2">: </span><span class="s4">&quot;Tournament&quot;</span><span class="s2">},</span>
+        <span class="s2">)</span>
+        <span class="s1">fig_gap_trend</span><span class="s2">.</span><span class="s1">add_hline</span><span class="s2">(</span>
+            <span class="s1">y</span><span class="s2">=</span><span class="s5">0</span><span class="s2">,</span>
+            <span class="s1">line_dash</span><span class="s2">=</span><span class="s4">&quot;dot&quot;</span><span class="s2">,</span>
+            <span class="s1">line_color</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.35)&quot;</span><span class="s2">,</span>
+            <span class="s1">annotation_text</span><span class="s2">=</span><span class="s4">&quot;Winner line&quot;</span><span class="s2">,</span>
+            <span class="s1">annotation_font_color</span><span class="s2">=</span><span class="s4">&quot;#2ECC87&quot;</span><span class="s2">,</span>
+        <span class="s2">)</span>
+        <span class="s1">fig_gap_trend</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+        <span class="s1">fig_gap_trend</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_gap_trend</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Score Distribution&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Frequency histogram of total scores. '</span>
+        <span class="s4">'A tight, left-shifted peak means consistent low scoring.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">dist_df </span><span class="s2">= </span><span class="s1">apply_top_n</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">)</span>
+    <span class="s1">fig_hist </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">histogram</span><span class="s2">(</span>
+        <span class="s1">dist_df</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;score&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">nbins</span><span class="s2">=</span><span class="s5">30</span><span class="s2">,</span>
+        <span class="s1">barmode</span><span class="s2">=</span><span class="s4">&quot;overlay&quot;</span><span class="s2">,</span>
+        <span class="s1">opacity</span><span class="s2">=</span><span class="s5">0.65</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Score frequency distribution by team&quot;</span><span class="s2">,</span>
+        <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+        <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;score&quot;</span><span class="s2">: </span><span class="s4">&quot;Total Score&quot;</span><span class="s2">},</span>
+    <span class="s2">)</span>
+    <span class="s1">fig_hist</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_hist</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;insight-box&quot;&gt;💡 A tight, left-leaning distribution = consistent low scorer. '</span>
+        <span class="s4">'Wide or right-skewed = high variance. Look for narrow humps shifted toward lower scores.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s3"># TAB 3 — TOURNAMENT PERFORMANCE</span>
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s0">with </span><span class="s1">tab3</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Tournament Scoring Averages&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Average team score grouped by tournament. Lower bars = better performance.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">tourn_raw </span><span class="s2">= (</span>
+        <span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">([</span><span class="s4">&quot;Event name&quot;</span><span class="s2">, </span><span class="s4">&quot;Team&quot;</span><span class="s2">])[</span><span class="s4">&quot;score&quot;</span><span class="s2">]</span>
+        <span class="s2">.</span><span class="s1">mean</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">reset_index</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">rename</span><span class="s2">(</span><span class="s1">columns</span><span class="s2">={</span><span class="s4">&quot;score&quot;</span><span class="s2">: </span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">})</span>
+    <span class="s2">)</span>
+    <span class="s1">tourn_df </span><span class="s2">= </span><span class="s1">apply_top_n</span><span class="s2">(</span><span class="s1">tourn_raw</span><span class="s2">, </span><span class="s1">col</span><span class="s2">=</span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">)</span>
+
+    <span class="s1">fig_tourn </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">bar</span><span class="s2">(</span>
+        <span class="s1">tourn_df</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">barmode</span><span class="s2">=</span><span class="s4">&quot;group&quot;</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Team scoring average by tournament&quot;</span><span class="s2">,</span>
+        <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+        <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;Event name&quot;</span><span class="s2">: </span><span class="s4">&quot;Tournament&quot;</span><span class="s2">},</span>
+    <span class="s2">)</span>
+    <span class="s1">fig_tourn</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+    <span class="s1">fig_tourn</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_tourn</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;insight-box&quot;&gt;💡 Compare bar heights within each tournament cluster. '</span>
+        <span class="s4">'A team with consistently short bars across all clusters is your top program.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s3"># TAB 4 — SCORE VS WINNER</span>
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s0">with </span><span class="s1">tab4</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Strokes Behind the Winner&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Average strokes behind the tournament winner per event. '</span>
+        <span class="s4">'Zero = matched the winner. Lower is better.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">diff_raw </span><span class="s2">= (</span>
+        <span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">([</span><span class="s4">&quot;Event name&quot;</span><span class="s2">, </span><span class="s4">&quot;Team&quot;</span><span class="s2">])[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">]</span>
+        <span class="s2">.</span><span class="s1">mean</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">reset_index</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">rename</span><span class="s2">(</span><span class="s1">columns</span><span class="s2">={</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">: </span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">})</span>
+    <span class="s2">)</span>
+    <span class="s1">diff_df </span><span class="s2">= </span><span class="s1">apply_top_n</span><span class="s2">(</span><span class="s1">diff_raw</span><span class="s2">, </span><span class="s1">col</span><span class="s2">=</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">)</span>
+
+    <span class="s1">fig_diff </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">bar</span><span class="s2">(</span>
+        <span class="s1">diff_df</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">barmode</span><span class="s2">=</span><span class="s4">&quot;group&quot;</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Average strokes behind winner per tournament&quot;</span><span class="s2">,</span>
+        <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+        <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;Event name&quot;</span><span class="s2">: </span><span class="s4">&quot;Tournament&quot;</span><span class="s2">},</span>
+    <span class="s2">)</span>
+    <span class="s1">fig_diff</span><span class="s2">.</span><span class="s1">add_hline</span><span class="s2">(</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s5">0</span><span class="s2">,</span>
+        <span class="s1">line_dash</span><span class="s2">=</span><span class="s4">&quot;dot&quot;</span><span class="s2">,</span>
+        <span class="s1">line_color</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.4)&quot;</span><span class="s2">,</span>
+        <span class="s1">annotation_text</span><span class="s2">=</span><span class="s4">&quot;Winner&quot;</span><span class="s2">,</span>
+        <span class="s1">annotation_font_color</span><span class="s2">=</span><span class="s4">&quot;#2ECC87&quot;</span><span class="s2">,</span>
+    <span class="s2">)</span>
+    <span class="s1">fig_diff</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+    <span class="s1">fig_diff</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_diff</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;---&quot;</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Overall Gap Distribution&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Box plot of strokes-behind-winner across all tournaments per team.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">box_df    </span><span class="s2">= </span><span class="s1">apply_top_n</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">)</span>
+    <span class="s1">box_order </span><span class="s2">= (</span>
+        <span class="s1">box_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">)[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">]</span>
+        <span class="s2">.</span><span class="s1">median</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">sort_values</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">index</span><span class="s2">.</span><span class="s1">tolist</span><span class="s2">()</span>
+    <span class="s2">)</span>
+
+    <span class="s1">fig_box </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">box</span><span class="s2">(</span>
+        <span class="s1">box_df</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Score vs winner distribution (all tournaments)&quot;</span><span class="s2">,</span>
+        <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+        <span class="s1">category_orders</span><span class="s2">={</span><span class="s4">&quot;Team&quot;</span><span class="s2">: </span><span class="s1">box_order</span><span class="s2">},</span>
+        <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">: </span><span class="s4">&quot;Strokes Behind Winner&quot;</span><span class="s2">},</span>
+        <span class="s1">points</span><span class="s2">=</span><span class="s4">&quot;outliers&quot;</span><span class="s2">,</span>
+    <span class="s2">)</span>
+    <span class="s1">fig_box</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+    <span class="s1">fig_box</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_box</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;insight-box&quot;&gt;💡 Short box + low median = consistent contender. '</span>
+        <span class="s4">'Tall box = high variance. Outlier dots show exceptional or poor individual events.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s3"># TAB 5 — LEADERBOARD</span>
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s0">with </span><span class="s1">tab5</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Tournament Leaderboard&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Select a tournament to see detailed team rankings for that event.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s1">col_sel1</span><span class="s2">, </span><span class="s1">col_sel2 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">([</span><span class="s5">2</span><span class="s2">, </span><span class="s5">1</span><span class="s2">])</span>
+    <span class="s0">with </span><span class="s1">col_sel1</span><span class="s2">:</span>
+        <span class="s1">selected_event </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">selectbox</span><span class="s2">(</span>
+            <span class="s4">&quot;Select Tournament&quot;</span><span class="s2">,</span>
+            <span class="s1">sorted</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">()),</span>
+            <span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;event_select&quot;</span><span class="s2">,</span>
+        <span class="s2">)</span>
+    <span class="s0">with </span><span class="s1">col_sel2</span><span class="s2">:</span>
+        <span class="s1">sort_by </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">selectbox</span><span class="s2">(</span>
+            <span class="s4">&quot;Sort by&quot;</span><span class="s2">,</span>
+            <span class="s2">[</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">, </span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">, </span><span class="s4">&quot;Avg Position&quot;</span><span class="s2">],</span>
+            <span class="s1">key</span><span class="s2">=</span><span class="s4">&quot;sort_select&quot;</span><span class="s2">,</span>
+        <span class="s2">)</span>
+
+    <span class="s1">event_df </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">] == </span><span class="s1">selected_event</span><span class="s2">]</span>
+
+    <span class="s1">leaderboard </span><span class="s2">= (</span>
+        <span class="s1">event_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">)</span>
+        <span class="s2">.</span><span class="s1">agg</span><span class="s2">(</span>
+            <span class="s1">Avg_Score</span><span class="s2">=(</span><span class="s4">&quot;score&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">),</span>
+            <span class="s1">Strokes_Behind</span><span class="s2">=(</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">),</span>
+            <span class="s1">Avg_Position</span><span class="s2">=(</span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">, </span><span class="s4">&quot;mean&quot;</span><span class="s2">),</span>
+            <span class="s1">Entries</span><span class="s2">=(</span><span class="s4">&quot;score&quot;</span><span class="s2">, </span><span class="s4">&quot;count&quot;</span><span class="s2">),</span>
+        <span class="s2">)</span>
+        <span class="s2">.</span><span class="s1">reset_index</span><span class="s2">()</span>
+        <span class="s2">.</span><span class="s1">rename</span><span class="s2">(</span><span class="s1">columns</span><span class="s2">={</span>
+            <span class="s4">&quot;Avg_Score&quot;</span><span class="s2">:      </span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">,</span>
+            <span class="s4">&quot;Strokes_Behind&quot;</span><span class="s2">: </span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">,</span>
+            <span class="s4">&quot;Avg_Position&quot;</span><span class="s2">:   </span><span class="s4">&quot;Avg Position&quot;</span><span class="s2">,</span>
+        <span class="s2">})</span>
+    <span class="s2">)</span>
+
+    <span class="s1">sort_map </span><span class="s2">= {</span>
+        <span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">: </span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">,</span>
+        <span class="s4">&quot;Avg Score&quot;</span><span class="s2">:      </span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">,</span>
+        <span class="s4">&quot;Avg Position&quot;</span><span class="s2">:   </span><span class="s4">&quot;Avg Position&quot;</span><span class="s2">,</span>
+    <span class="s2">}</span>
+    <span class="s1">leaderboard </span><span class="s2">= </span><span class="s1">leaderboard</span><span class="s2">.</span><span class="s1">sort_values</span><span class="s2">(</span><span class="s1">sort_map</span><span class="s2">[</span><span class="s1">sort_by</span><span class="s2">]).</span><span class="s1">reset_index</span><span class="s2">(</span><span class="s1">drop</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">leaderboard</span><span class="s2">.</span><span class="s1">index </span><span class="s2">+= </span><span class="s5">1</span>
+    <span class="s1">leaderboard</span><span class="s2">[</span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">]      = </span><span class="s1">leaderboard</span><span class="s2">[</span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">].</span><span class="s1">round</span><span class="s2">(</span><span class="s5">1</span><span class="s2">)</span>
+    <span class="s1">leaderboard</span><span class="s2">[</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">] = </span><span class="s1">leaderboard</span><span class="s2">[</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">].</span><span class="s1">round</span><span class="s2">(</span><span class="s5">1</span><span class="s2">)</span>
+    <span class="s1">leaderboard</span><span class="s2">[</span><span class="s4">&quot;Avg Position&quot;</span><span class="s2">]   = </span><span class="s1">leaderboard</span><span class="s2">[</span><span class="s4">&quot;Avg Position&quot;</span><span class="s2">].</span><span class="s1">round</span><span class="s2">(</span><span class="s5">1</span><span class="s2">)</span>
+
+    <span class="s1">col_lb1</span><span class="s2">, </span><span class="s1">col_lb2 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">([</span><span class="s5">1</span><span class="s2">, </span><span class="s5">1</span><span class="s2">])</span>
+
+    <span class="s0">with </span><span class="s1">col_lb1</span><span class="s2">:</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">dataframe</span><span class="s2">(</span>
+            <span class="s1">leaderboard</span><span class="s2">[[</span><span class="s4">&quot;Team&quot;</span><span class="s2">, </span><span class="s4">&quot;Avg Score&quot;</span><span class="s2">, </span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">, </span><span class="s4">&quot;Avg Position&quot;</span><span class="s2">, </span><span class="s4">&quot;Entries&quot;</span><span class="s2">]],</span>
+            <span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+            <span class="s1">height</span><span class="s2">=</span><span class="s5">400</span><span class="s2">,</span>
+        <span class="s2">)</span>
+
+    <span class="s0">with </span><span class="s1">col_lb2</span><span class="s2">:</span>
+        <span class="s1">fig_lb </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">bar</span><span class="s2">(</span>
+            <span class="s1">leaderboard</span><span class="s2">,</span>
+            <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+            <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">,</span>
+            <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+            <span class="s1">title</span><span class="s2">=</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">selected_event</span><span class="s0">} </span><span class="s4">— strokes behind winner&quot;</span><span class="s2">,</span>
+            <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">TEAM_PALETTE</span><span class="s2">,</span>
+        <span class="s2">)</span>
+        <span class="s1">fig_lb</span><span class="s2">.</span><span class="s1">add_hline</span><span class="s2">(</span>
+            <span class="s1">y</span><span class="s2">=</span><span class="s5">0</span><span class="s2">,</span>
+            <span class="s1">line_dash</span><span class="s2">=</span><span class="s4">&quot;dot&quot;</span><span class="s2">,</span>
+            <span class="s1">line_color</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.4)&quot;</span><span class="s2">,</span>
+            <span class="s1">annotation_text</span><span class="s2">=</span><span class="s4">&quot;Winner&quot;</span><span class="s2">,</span>
+            <span class="s1">annotation_font_color</span><span class="s2">=</span><span class="s4">&quot;#2ECC87&quot;</span><span class="s2">,</span>
+        <span class="s2">)</span>
+        <span class="s1">fig_lb</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+        <span class="s1">fig_lb</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_lb</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s0">if not </span><span class="s1">leaderboard</span><span class="s2">.</span><span class="s1">empty</span><span class="s2">:</span>
+        <span class="s1">winner_team </span><span class="s2">= </span><span class="s1">leaderboard</span><span class="s2">.</span><span class="s1">iloc</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s4">&quot;Team&quot;</span><span class="s2">]</span>
+        <span class="s1">winner_gap  </span><span class="s2">= </span><span class="s1">leaderboard</span><span class="s2">.</span><span class="s1">iloc</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">]</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+            <span class="s4">f'&lt;div class=&quot;insight-box&quot;&gt;🏆 &lt;strong&gt;</span><span class="s0">{</span><span class="s1">winner_team</span><span class="s0">}</span><span class="s4">&lt;/strong&gt; performed best at '</span>
+            <span class="s4">f'&lt;em&gt;</span><span class="s0">{</span><span class="s1">selected_event</span><span class="s0">}</span><span class="s4">&lt;/em&gt; — averaging &lt;strong&gt;</span><span class="s0">{</span><span class="s1">winner_gap</span><span class="s0">:</span><span class="s4">+.1f</span><span class="s0">}</span><span class="s4">&lt;/strong&gt; strokes vs the winner.&lt;/div&gt;'</span><span class="s2">,</span>
+            <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+        <span class="s2">)</span>
+
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s3"># TAB 6 — HEAD-TO-HEAD</span>
+<span class="s3"># ─────────────────────────────────────────</span>
+<span class="s0">with </span><span class="s1">tab6</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">'&lt;div class=&quot;section-header&quot;&gt;Head-to-Head Comparison&lt;/div&gt;'</span><span class="s2">, </span><span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+        <span class="s4">'&lt;div class=&quot;section-sub&quot;&gt;Select two teams from the sidebar to compare performance across shared tournaments.&lt;/div&gt;'</span><span class="s2">,</span>
+        <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+    <span class="s2">)</span>
+
+    <span class="s0">if </span><span class="s1">len</span><span class="s2">(</span><span class="s1">compare_teams</span><span class="s2">) != </span><span class="s5">2</span><span class="s2">:</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+            <span class="s4">'&lt;div class=&quot;warn-box&quot;&gt;⚠️ Select exactly 2 teams from the &lt;strong&gt;Head-to-Head&lt;/strong&gt; '</span>
+            <span class="s4">'section in the sidebar to enable this view.&lt;/div&gt;'</span><span class="s2">,</span>
+            <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+        <span class="s2">)</span>
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">t1</span><span class="s2">, </span><span class="s1">t2    </span><span class="s2">= </span><span class="s1">compare_teams</span>
+        <span class="s1">df_cmp    </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">compare_teams</span><span class="s2">)]</span>
+        <span class="s1">colors_h2h </span><span class="s2">= [</span><span class="s1">TEAM_PALETTE</span><span class="s2">[</span><span class="s5">0</span><span class="s2">], </span><span class="s1">TEAM_PALETTE</span><span class="s2">[</span><span class="s5">1</span><span class="s2">]]</span>
+
+        <span class="s1">pivot </span><span class="s2">= (</span>
+            <span class="s1">df_cmp</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">([</span><span class="s4">&quot;Event name&quot;</span><span class="s2">, </span><span class="s4">&quot;Team&quot;</span><span class="s2">])[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">]</span>
+            <span class="s2">.</span><span class="s1">mean</span><span class="s2">()</span>
+            <span class="s2">.</span><span class="s1">unstack</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">)</span>
+            <span class="s2">.</span><span class="s1">dropna</span><span class="s2">()</span>
+            <span class="s2">.</span><span class="s1">reset_index</span><span class="s2">()</span>
+        <span class="s2">)</span>
+
+        <span class="s1">fig_h2h </span><span class="s2">= </span><span class="s1">go</span><span class="s2">.</span><span class="s1">Figure</span><span class="s2">()</span>
+        <span class="s0">for </span><span class="s1">i</span><span class="s2">, </span><span class="s1">team </span><span class="s0">in </span><span class="s1">enumerate</span><span class="s2">(</span><span class="s1">compare_teams</span><span class="s2">):</span>
+            <span class="s0">if </span><span class="s1">team </span><span class="s0">in </span><span class="s1">pivot</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">:</span>
+                <span class="s1">fig_h2h</span><span class="s2">.</span><span class="s1">add_trace</span><span class="s2">(</span><span class="s1">go</span><span class="s2">.</span><span class="s1">Bar</span><span class="s2">(</span>
+                    <span class="s1">name</span><span class="s2">=</span><span class="s1">team</span><span class="s2">,</span>
+                    <span class="s1">x</span><span class="s2">=</span><span class="s1">pivot</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">],</span>
+                    <span class="s1">y</span><span class="s2">=</span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">team</span><span class="s2">],</span>
+                    <span class="s1">marker_color</span><span class="s2">=</span><span class="s1">colors_h2h</span><span class="s2">[</span><span class="s1">i</span><span class="s2">],</span>
+                    <span class="s1">opacity</span><span class="s2">=</span><span class="s5">0.85</span><span class="s2">,</span>
+                <span class="s2">))</span>
+        <span class="s1">fig_h2h</span><span class="s2">.</span><span class="s1">add_hline</span><span class="s2">(</span>
+            <span class="s1">y</span><span class="s2">=</span><span class="s5">0</span><span class="s2">,</span>
+            <span class="s1">line_dash</span><span class="s2">=</span><span class="s4">&quot;dot&quot;</span><span class="s2">,</span>
+            <span class="s1">line_color</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.4)&quot;</span><span class="s2">,</span>
+            <span class="s1">annotation_text</span><span class="s2">=</span><span class="s4">&quot;Winner&quot;</span><span class="s2">,</span>
+            <span class="s1">annotation_font_color</span><span class="s2">=</span><span class="s4">&quot;#2ECC87&quot;</span><span class="s2">,</span>
+        <span class="s2">)</span>
+        <span class="s1">fig_h2h</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(</span>
+            <span class="s2">**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">,</span>
+            <span class="s1">barmode</span><span class="s2">=</span><span class="s4">&quot;group&quot;</span><span class="s2">,</span>
+            <span class="s1">title</span><span class="s2">=</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">t1</span><span class="s0">}  </span><span class="s4">vs  </span><span class="s0">{</span><span class="s1">t2</span><span class="s0">} </span><span class="s4">— strokes behind winner per tournament&quot;</span><span class="s2">,</span>
+        <span class="s2">)</span>
+        <span class="s1">fig_h2h</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_h2h</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+        <span class="s0">if </span><span class="s1">t1 </span><span class="s0">in </span><span class="s1">pivot</span><span class="s2">.</span><span class="s1">columns </span><span class="s0">and </span><span class="s1">t2 </span><span class="s0">in </span><span class="s1">pivot</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">:</span>
+            <span class="s1">t1_wins </span><span class="s2">= </span><span class="s1">int</span><span class="s2">((</span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">t1</span><span class="s2">] &lt; </span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">t2</span><span class="s2">]).</span><span class="s1">sum</span><span class="s2">())</span>
+            <span class="s1">t2_wins </span><span class="s2">= </span><span class="s1">int</span><span class="s2">((</span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">t2</span><span class="s2">] &lt; </span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">t1</span><span class="s2">]).</span><span class="s1">sum</span><span class="s2">())</span>
+            <span class="s1">ties    </span><span class="s2">= </span><span class="s1">int</span><span class="s2">((</span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">t1</span><span class="s2">] == </span><span class="s1">pivot</span><span class="s2">[</span><span class="s1">t2</span><span class="s2">]).</span><span class="s1">sum</span><span class="s2">())</span>
+
+            <span class="s1">col_c1</span><span class="s2">, </span><span class="s1">col_c2</span><span class="s2">, </span><span class="s1">col_c3 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">(</span><span class="s5">3</span><span class="s2">)</span>
+            <span class="s1">col_c1</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">t1</span><span class="s0">} </span><span class="s4">events won&quot;</span><span class="s2">, </span><span class="s1">t1_wins</span><span class="s2">)</span>
+            <span class="s1">col_c2</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">&quot;Ties&quot;</span><span class="s2">, </span><span class="s1">ties</span><span class="s2">)</span>
+            <span class="s1">col_c3</span><span class="s2">.</span><span class="s1">metric</span><span class="s2">(</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">t2</span><span class="s0">} </span><span class="s4">events won&quot;</span><span class="s2">, </span><span class="s1">t2_wins</span><span class="s2">)</span>
+
+            <span class="s1">scatter_df </span><span class="s2">= </span><span class="s1">pivot</span><span class="s2">.</span><span class="s1">melt</span><span class="s2">(</span>
+                <span class="s1">id_vars</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+                <span class="s1">value_vars</span><span class="s2">=[</span><span class="s1">t1</span><span class="s2">, </span><span class="s1">t2</span><span class="s2">],</span>
+                <span class="s1">var_name</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+                <span class="s1">value_name</span><span class="s2">=</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">,</span>
+            <span class="s2">)</span>
+            <span class="s1">fig_scatter </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">scatter</span><span class="s2">(</span>
+                <span class="s1">scatter_df</span><span class="s2">,</span>
+                <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+                <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Strokes Behind&quot;</span><span class="s2">,</span>
+                <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+                <span class="s1">symbol</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+                <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Per-tournament result scatter&quot;</span><span class="s2">,</span>
+                <span class="s1">color_discrete_sequence</span><span class="s2">=</span><span class="s1">colors_h2h</span><span class="s2">,</span>
+                <span class="s1">labels</span><span class="s2">={</span><span class="s4">&quot;Event name&quot;</span><span class="s2">: </span><span class="s4">&quot;Tournament&quot;</span><span class="s2">},</span>
+            <span class="s2">)</span>
+            <span class="s1">fig_scatter</span><span class="s2">.</span><span class="s1">update_traces</span><span class="s2">(</span><span class="s1">marker</span><span class="s2">=</span><span class="s1">dict</span><span class="s2">(</span><span class="s1">size</span><span class="s2">=</span><span class="s5">10</span><span class="s2">))</span>
+            <span class="s1">fig_scatter</span><span class="s2">.</span><span class="s1">add_hline</span><span class="s2">(</span>
+                <span class="s1">y</span><span class="s2">=</span><span class="s5">0</span><span class="s2">,</span>
+                <span class="s1">line_dash</span><span class="s2">=</span><span class="s4">&quot;dot&quot;</span><span class="s2">,</span>
+                <span class="s1">line_color</span><span class="s2">=</span><span class="s4">&quot;rgba(46,204,135,0.3)&quot;</span><span class="s2">,</span>
+            <span class="s2">)</span>
+            <span class="s1">fig_scatter</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(**</span><span class="s1">PLOTLY_LAYOUT</span><span class="s2">)</span>
+            <span class="s1">fig_scatter</span><span class="s2">.</span><span class="s1">update_xaxes</span><span class="s2">(</span><span class="s1">tickangle</span><span class="s2">=-</span><span class="s5">35</span><span class="s2">)</span>
+            <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig_scatter</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+            <span class="s1">avg_t1  </span><span class="s2">= </span><span class="s1">df_cmp</span><span class="s2">[</span><span class="s1">df_cmp</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">] == </span><span class="s1">t1</span><span class="s2">][</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">()</span>
+            <span class="s1">avg_t2  </span><span class="s2">= </span><span class="s1">df_cmp</span><span class="s2">[</span><span class="s1">df_cmp</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">] == </span><span class="s1">t2</span><span class="s2">][</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">()</span>
+            <span class="s1">better  </span><span class="s2">= </span><span class="s1">t1 </span><span class="s0">if </span><span class="s1">avg_t1 </span><span class="s2">&lt; </span><span class="s1">avg_t2 </span><span class="s0">else </span><span class="s1">t2</span>
+            <span class="s1">margin  </span><span class="s2">= </span><span class="s1">abs</span><span class="s2">(</span><span class="s1">avg_t1 </span><span class="s2">- </span><span class="s1">avg_t2</span><span class="s2">)</span>
+            <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span>
+                <span class="s4">f'&lt;div class=&quot;insight-box&quot;&gt;📊 Overall, &lt;strong&gt;</span><span class="s0">{</span><span class="s1">better</span><span class="s0">}</span><span class="s4">&lt;/strong&gt; performs closer to tournament '</span>
+                <span class="s4">f'winners by an average of &lt;strong&gt;</span><span class="s0">{</span><span class="s1">margin</span><span class="s0">:</span><span class="s4">.1f</span><span class="s0">} </span><span class="s4">strokes&lt;/strong&gt; per event.&lt;/div&gt;'</span><span class="s2">,</span>
+                <span class="s1">unsafe_allow_html</span><span class="s2">=</span><span class="s0">True</span><span class="s2">,</span>
+            <span class="s2">)</span>
+</pre>
+</body>
+</html>

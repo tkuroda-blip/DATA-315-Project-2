@@ -1,0 +1,232 @@
+<html>
+<head>
+<title>app2.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#191a1c">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+app2.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">streamlit </span><span class="s0">as </span><span class="s1">st</span>
+<span class="s0">import </span><span class="s1">pandas </span><span class="s0">as </span><span class="s1">pd</span>
+<span class="s0">import </span><span class="s1">plotly</span><span class="s2">.</span><span class="s1">express </span><span class="s0">as </span><span class="s1">px</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># CONFIG</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">set_page_config</span><span class="s2">(</span><span class="s1">page_title</span><span class="s2">=</span><span class="s4">&quot;Golf Dashboard&quot;</span><span class="s2">, </span><span class="s1">layout</span><span class="s2">=</span><span class="s4">&quot;wide&quot;</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># LOAD DATA</span>
+<span class="s3"># =========================</span>
+<span class="s2">@</span><span class="s1">st</span><span class="s2">.</span><span class="s1">cache_data</span>
+<span class="s0">def </span><span class="s1">load_data</span><span class="s2">():</span>
+    <span class="s0">return </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">read_csv</span><span class="s2">(</span><span class="s4">&quot;golf_data_validated.csv&quot;</span><span class="s2">)</span>
+
+<span class="s1">df </span><span class="s2">= </span><span class="s1">load_data</span><span class="s2">()</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># CLEAN DATA</span>
+<span class="s3"># =========================</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">] = </span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Position&quot;</span><span class="s2">].</span><span class="s1">astype</span><span class="s2">(</span><span class="s1">str</span><span class="s2">).</span><span class="s1">str</span><span class="s2">.</span><span class="s1">extract</span><span class="s2">(</span><span class="s4">r'(\d+)'</span><span class="s2">)</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">] = </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">to_numeric</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">], </span><span class="s1">errors</span><span class="s2">=</span><span class="s4">'coerce'</span><span class="s2">)</span>
+
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">] = </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">to_numeric</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">], </span><span class="s1">errors</span><span class="s2">=</span><span class="s4">'coerce'</span><span class="s2">)</span>
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">] = </span><span class="s1">pd</span><span class="s2">.</span><span class="s1">to_numeric</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">], </span><span class="s1">errors</span><span class="s2">=</span><span class="s4">'coerce'</span><span class="s2">)</span>
+
+<span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">] = </span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;score&quot;</span><span class="s2">] - </span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">]</span>
+
+<span class="s1">df </span><span class="s2">= </span><span class="s1">df</span><span class="s2">.</span><span class="s1">dropna</span><span class="s2">(</span><span class="s1">subset</span><span class="s2">=[</span><span class="s4">&quot;score&quot;</span><span class="s2">, </span><span class="s4">&quot;Winner Score&quot;</span><span class="s2">, </span><span class="s4">&quot;Position_clean&quot;</span><span class="s2">])</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># HEADER</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">title</span><span class="s2">(</span><span class="s4">&quot;⛳ College Golf Performance Dashboard&quot;</span><span class="s2">)</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;Analyze team performance by tournament and compare against winners.&quot;</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># SIDEBAR FILTERS</span>
+<span class="s3"># =========================</span>
+<span class="s1">st</span><span class="s2">.</span><span class="s1">sidebar</span><span class="s2">.</span><span class="s1">header</span><span class="s2">(</span><span class="s4">&quot;Filters&quot;</span><span class="s2">)</span>
+
+<span class="s1">teams </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">sidebar</span><span class="s2">.</span><span class="s1">multiselect</span><span class="s2">(</span>
+    <span class="s4">&quot;Select Teams&quot;</span><span class="s2">,</span>
+    <span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">()),</span>
+    <span class="s1">default</span><span class="s2">=</span><span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">())</span>
+<span class="s2">)</span>
+
+<span class="s1">events </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">sidebar</span><span class="s2">.</span><span class="s1">multiselect</span><span class="s2">(</span>
+    <span class="s4">&quot;Select Tournaments&quot;</span><span class="s2">,</span>
+    <span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">()),</span>
+    <span class="s1">default</span><span class="s2">=</span><span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">())</span>
+<span class="s2">)</span>
+
+<span class="s1">compare_teams </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">sidebar</span><span class="s2">.</span><span class="s1">multiselect</span><span class="s2">(</span>
+    <span class="s4">&quot;Compare 2 Teams&quot;</span><span class="s2">,</span>
+    <span class="s1">sorted</span><span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">())</span>
+<span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># FILTER DATA</span>
+<span class="s3"># =========================</span>
+<span class="s1">filtered_df </span><span class="s2">= </span><span class="s1">df</span><span class="s2">[</span>
+    <span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">teams</span><span class="s2">)) &amp;</span>
+    <span class="s2">(</span><span class="s1">df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">events</span><span class="s2">))</span>
+<span class="s2">]</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># TABS</span>
+<span class="s3"># =========================</span>
+<span class="s1">tab1</span><span class="s2">, </span><span class="s1">tab2</span><span class="s2">, </span><span class="s1">tab3</span><span class="s2">, </span><span class="s1">tab4</span><span class="s2">, </span><span class="s1">tab5 </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">tabs</span><span class="s2">([</span>
+    <span class="s4">&quot;📍 Map&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;🏆 Tournament Performance&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;📊 Score vs Winner&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;🏫 Leaderboard&quot;</span><span class="s2">,</span>
+    <span class="s4">&quot;⚔️ Comparison&quot;</span>
+<span class="s2">])</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># MAP</span>
+<span class="s3"># =========================</span>
+<span class="s0">with </span><span class="s1">tab1</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">subheader</span><span class="s2">(</span><span class="s4">&quot;Tournament Locations&quot;</span><span class="s2">)</span>
+
+    <span class="s0">if </span><span class="s2">{</span><span class="s4">&quot;Latitude&quot;</span><span class="s2">, </span><span class="s4">&quot;Longitude&quot;</span><span class="s2">}.</span><span class="s1">issubset</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">columns</span><span class="s2">):</span>
+
+        <span class="s1">map_df </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">drop_duplicates</span><span class="s2">(</span><span class="s1">subset</span><span class="s2">=[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">])</span>
+
+        <span class="s1">fig </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">scatter_mapbox</span><span class="s2">(</span>
+            <span class="s1">map_df</span><span class="s2">,</span>
+            <span class="s1">lat</span><span class="s2">=</span><span class="s4">&quot;Latitude&quot;</span><span class="s2">,</span>
+            <span class="s1">lon</span><span class="s2">=</span><span class="s4">&quot;Longitude&quot;</span><span class="s2">,</span>
+            <span class="s1">hover_name</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+            <span class="s1">zoom</span><span class="s2">=</span><span class="s5">3</span><span class="s2">,</span>
+            <span class="s1">height</span><span class="s2">=</span><span class="s5">500</span>
+        <span class="s2">)</span>
+
+        <span class="s1">fig</span><span class="s2">.</span><span class="s1">update_layout</span><span class="s2">(</span><span class="s1">mapbox_style</span><span class="s2">=</span><span class="s4">&quot;open-street-map&quot;</span><span class="s2">)</span>
+
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">warning</span><span class="s2">(</span><span class="s4">&quot;Latitude/Longitude not found in dataset.&quot;</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># TOURNAMENT PERFORMANCE</span>
+<span class="s3"># =========================</span>
+<span class="s0">with </span><span class="s1">tab2</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">subheader</span><span class="s2">(</span><span class="s4">&quot;Average Score by Team per Tournament&quot;</span><span class="s2">)</span>
+
+    <span class="s1">tournament_team </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span>
+        <span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">, </span><span class="s4">&quot;Team&quot;</span><span class="s2">]</span>
+    <span class="s2">)[</span><span class="s4">&quot;score&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">().</span><span class="s1">reset_index</span><span class="s2">()</span>
+
+    <span class="s1">fig </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">bar</span><span class="s2">(</span>
+        <span class="s1">tournament_team</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;score&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">barmode</span><span class="s2">=</span><span class="s4">&quot;group&quot;</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Team Scoring Average by Tournament&quot;</span>
+    <span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># SCORE VS WINNER (KEY)</span>
+<span class="s3"># =========================</span>
+<span class="s0">with </span><span class="s1">tab3</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">subheader</span><span class="s2">(</span><span class="s4">&quot;Strokes Behind Winner by Tournament&quot;</span><span class="s2">)</span>
+
+    <span class="s1">diff_df </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span>
+        <span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">, </span><span class="s4">&quot;Team&quot;</span><span class="s2">]</span>
+    <span class="s2">)[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">().</span><span class="s1">reset_index</span><span class="s2">()</span>
+
+    <span class="s1">fig </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">bar</span><span class="s2">(</span>
+        <span class="s1">diff_df</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">barmode</span><span class="s2">=</span><span class="s4">&quot;group&quot;</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">&quot;Average Strokes Behind Winner (Per Tournament)&quot;</span>
+    <span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;Lower values indicate performance closer to the winner.&quot;</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># LEADERBOARD (PER EVENT)</span>
+<span class="s3"># =========================</span>
+<span class="s0">with </span><span class="s1">tab4</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">subheader</span><span class="s2">(</span><span class="s4">&quot;Tournament Leaderboard&quot;</span><span class="s2">)</span>
+
+    <span class="s1">selected_event </span><span class="s2">= </span><span class="s1">st</span><span class="s2">.</span><span class="s1">selectbox</span><span class="s2">(</span>
+        <span class="s4">&quot;Select Tournament&quot;</span><span class="s2">,</span>
+        <span class="s1">sorted</span><span class="s2">(</span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">].</span><span class="s1">unique</span><span class="s2">())</span>
+    <span class="s2">)</span>
+
+    <span class="s1">event_df </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Event name&quot;</span><span class="s2">] == </span><span class="s1">selected_event</span><span class="s2">]</span>
+
+    <span class="s1">leaderboard </span><span class="s2">= </span><span class="s1">event_df</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">).</span><span class="s1">agg</span><span class="s2">({</span>
+        <span class="s4">&quot;score&quot;</span><span class="s2">: </span><span class="s4">&quot;mean&quot;</span><span class="s2">,</span>
+        <span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">: </span><span class="s4">&quot;mean&quot;</span><span class="s2">,</span>
+        <span class="s4">&quot;Position_clean&quot;</span><span class="s2">: </span><span class="s4">&quot;mean&quot;</span>
+    <span class="s2">}).</span><span class="s1">reset_index</span><span class="s2">()</span>
+
+    <span class="s1">leaderboard </span><span class="s2">= </span><span class="s1">leaderboard</span><span class="s2">.</span><span class="s1">sort_values</span><span class="s2">(</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">dataframe</span><span class="s2">(</span><span class="s1">leaderboard</span><span class="s2">)</span>
+
+    <span class="s1">fig </span><span class="s2">= </span><span class="s1">px</span><span class="s2">.</span><span class="s1">bar</span><span class="s2">(</span>
+        <span class="s1">leaderboard</span><span class="s2">,</span>
+        <span class="s1">x</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">y</span><span class="s2">=</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">,</span>
+        <span class="s1">color</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+        <span class="s1">title</span><span class="s2">=</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">selected_event</span><span class="s0">} </span><span class="s4">- Team Performance vs Winner&quot;</span>
+    <span class="s2">)</span>
+
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">plotly_chart</span><span class="s2">(</span><span class="s1">fig</span><span class="s2">, </span><span class="s1">use_container_width</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+<span class="s3"># =========================</span>
+<span class="s3"># TEAM COMPARISON</span>
+<span class="s3"># =========================</span>
+<span class="s0">with </span><span class="s1">tab5</span><span class="s2">:</span>
+    <span class="s1">st</span><span class="s2">.</span><span class="s1">subheader</span><span class="s2">(</span><span class="s4">&quot;Head-to-Head Comparison by Tournament&quot;</span><span class="s2">)</span>
+
+    <span class="s0">if </span><span class="s1">len</span><span class="s2">(</span><span class="s1">compare_teams</span><span class="s2">) != </span><span class="s5">2</span><span class="s2">:</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">warning</span><span class="s2">(</span><span class="s4">&quot;Select exactly 2 teams.&quot;</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">df_compare </span><span class="s2">= </span><span class="s1">filtered_df</span><span class="s2">[</span>
+            <span class="s1">filtered_df</span><span class="s2">[</span><span class="s4">&quot;Team&quot;</span><span class="s2">].</span><span class="s1">isin</span><span class="s2">(</span><span class="s1">compare_teams</span><span class="s2">)</span>
+        <span class="s2">]</span>
+
+        <span class="s1">pivot </span><span class="s2">= </span><span class="s1">df_compare</span><span class="s2">.</span><span class="s1">pivot_table</span><span class="s2">(</span>
+            <span class="s1">index</span><span class="s2">=</span><span class="s4">&quot;Event name&quot;</span><span class="s2">,</span>
+            <span class="s1">columns</span><span class="s2">=</span><span class="s4">&quot;Team&quot;</span><span class="s2">,</span>
+            <span class="s1">values</span><span class="s2">=</span><span class="s4">&quot;Score_vs_Winner&quot;</span>
+        <span class="s2">)</span>
+
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;### Performance vs Winner per Tournament&quot;</span><span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">bar_chart</span><span class="s2">(</span><span class="s1">pivot</span><span class="s2">)</span>
+
+        <span class="s3"># Insight</span>
+        <span class="s1">avg </span><span class="s2">= </span><span class="s1">df_compare</span><span class="s2">.</span><span class="s1">groupby</span><span class="s2">(</span><span class="s4">&quot;Team&quot;</span><span class="s2">)[</span><span class="s4">&quot;Score_vs_Winner&quot;</span><span class="s2">].</span><span class="s1">mean</span><span class="s2">()</span>
+        <span class="s1">better_team </span><span class="s2">= </span><span class="s1">avg</span><span class="s2">.</span><span class="s1">idxmin</span><span class="s2">()</span>
+
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">success</span><span class="s2">(</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">better_team</span><span class="s0">} </span><span class="s4">performs closer to tournament winners on average.&quot;</span><span class="s2">)</span>
+
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">markdown</span><span class="s2">(</span><span class="s4">&quot;### Detailed Data&quot;</span><span class="s2">)</span>
+        <span class="s1">st</span><span class="s2">.</span><span class="s1">dataframe</span><span class="s2">(</span><span class="s1">df_compare</span><span class="s2">.</span><span class="s1">sort_values</span><span class="s2">(</span><span class="s4">&quot;Event name&quot;</span><span class="s2">))</span></pre>
+</body>
+</html>
